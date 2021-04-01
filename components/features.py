@@ -8,9 +8,9 @@ import numpy as np
 
 
 def get_model():
-    model = models.vgg16(pretrained=True)
-    model.classifier = nn.Sequential(*[model.classifier[i] for i in range(4)])
-    return model
+    model = models.resnext101_32x8d(pretrained=True)
+    newmodel = torch.nn.Sequential(*(list(model.children())[:-1]))
+    return newmodel
 
 
 def get_preprocess_pipeline():

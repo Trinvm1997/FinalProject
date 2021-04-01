@@ -16,7 +16,7 @@ np.random.seed(0)
 import time
 
 
-def plot_multiple_img(image_paths, output_path, rows=1, cols=6):
+def plot_multiple_img(image_paths, output_path, rows=1, cols=5):
     fig, ax = plt.subplots(nrows=rows, ncols=cols, figsize=(10, 2))
     for idx, path in enumerate(image_paths):
         im = Image.open(path)
@@ -37,10 +37,11 @@ def knn(input_path, output_path, features_path, n=6):
     print("[INFO] Loading Features")
     feature_list = np.load(os.path.join(features_path, "features.npy"))
     filename_list = np.load(os.path.join(features_path, "filenames.npy"))
+    feature_list = feature_list.reshape(9997,2048)
 
     print("[INFO] Training KNN Model")
     neighbors = NearestNeighbors(
-        n_neighbors=6, algorithm="brute", metric="euclidean"
+        n_neighbors=5, algorithm="brute", metric="euclidean"
     ).fit(feature_list)
 
     print("[INFO] Extracting Feature Vector")
@@ -49,6 +50,8 @@ def knn(input_path, output_path, features_path, n=6):
     im = im.unsqueeze(0)
     with torch.no_grad():
         input_features = model(im).numpy()
+    input_features = [input_features.reshape(2048,1).flatten()]
+    print(input_features)
 
     print("[INFO] Finding Similar Images")
     import time
