@@ -29,8 +29,8 @@ if uploaded_file is not None:
 
         preprocess = features.get_preprocess_pipeline()
 
-        feature_list = np.load(os.path.join("output/", "features.npy"))
-        filename_list = np.load(os.path.join("output/", "filenames.npy"))
+        feature_list = np.load(os.path.join("output/", "features.npy"),allow_pickle=True,fix_imports=True,encoding='latin1')
+        filename_list = np.load(os.path.join("output/", "filenames.npy"),allow_pickle=True,fix_imports=True,encoding='latin1')
         feature_list = feature_list.reshape(9997,2048)
 
         neighbors = NearestNeighbors(
