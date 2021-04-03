@@ -4,3 +4,4 @@ numpy
 annoy
 sklearn
 matplotlib
+streamlit
