@@ -52,7 +52,7 @@ if uploaded_file is not None:
 
         fig, ax = plt.subplots(nrows=1, ncols=5, figsize=(10, 2))
         for idx, path in enumerate(similar_image_paths):
-            path = "./" + path
+            path.replace("/","\\")
             im = Image.open(path)
             ax.ravel()[idx].imshow(np.asarray(im))
             ax.ravel()[idx].set_axis_off()
@@ -60,5 +60,3 @@ if uploaded_file is not None:
         fig.savefig("output/result.png")
         st.write("Done.")
         st.image(Image.open("output/result.png"),caption='Similar cats', use_column_width=True)
-
-    
