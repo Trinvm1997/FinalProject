@@ -52,9 +52,8 @@ if uploaded_file is not None:
 
         fig, ax = plt.subplots(nrows=1, ncols=5, figsize=(10, 2))
         for idx, path in enumerate(similar_image_paths):
-            path = path.replace("/","\\")
-            print(path)
-            im = Image.open(path)
+            # path = path.replace("/","\\")
+            im = Image.open("data\cat\cat\\00000001_000.jpg")
             ax.ravel()[idx].imshow(np.asarray(im))
             ax.ravel()[idx].set_axis_off()
         plt.tight_layout()
