@@ -11,7 +11,6 @@ import torch
 import matplotlib.pyplot as plt
 import matplotlib
 
-
 st.title("Visual Search Engine")
 st.header("Cat image classification example")
 st.text("Upload a random cat image for searching")
@@ -53,6 +52,7 @@ if uploaded_file is not None:
 
         fig, ax = plt.subplots(nrows=1, ncols=5, figsize=(10, 2))
         for idx, path in enumerate(similar_image_paths):
+            path = "./" + path
             im = Image.open(path)
             ax.ravel()[idx].imshow(np.asarray(im))
             ax.ravel()[idx].set_axis_off()
