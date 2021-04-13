@@ -1,6 +1,6 @@
 annoy
 streamlit
-torch
+torch==1.8.0
 pandas
 joblib
 matplotlib
