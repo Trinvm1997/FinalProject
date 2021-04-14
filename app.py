@@ -53,5 +53,5 @@ if uploaded_file is not None:
             ax.ravel()[idx].imshow(np.asarray(im))
             ax.ravel()[idx].set_axis_off()
         plt.tight_layout()
-        fig.savefig("output/result.png")
-        st.image(Image.open("output/result.png"),caption='Similar cats', use_column_width=True)
+        fig.savefig("output/result/result.png")
+        st.image(Image.open("output/result/result.png"),caption='Similar cats', use_column_width=True)
