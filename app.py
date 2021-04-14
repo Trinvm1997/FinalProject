@@ -50,7 +50,7 @@ if uploaded_file is not None:
         n_components = 128
         pca = PCA(n_components=n_components)
         components = pca.fit_transform(feature_list)
-        joblib.dump(pca, os.path.join("output/", "pca.joblib"))
+        joblib.dump(pca, os.path.join("pca.joblib"))
 
         feature_length = n_components
         index = AnnoyIndex(feature_length, 'angular')
