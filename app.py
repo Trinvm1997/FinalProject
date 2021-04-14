@@ -5,12 +5,14 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 from components import search,features
-import os
+import os, torch, matplotlib, time, joblib
 from sklearn.neighbors import NearestNeighbors
-import torch
 import matplotlib.pyplot as plt
-import matplotlib
-import time
+from annoy import AnnoyIndex
+from sklearn.decomposition import PCA
+
+matplotlib.use('Agg')
+np.random.seed(0)
 
 st.title("Visual Search Engine")
 st.header("Cat image classification example")
@@ -28,9 +30,9 @@ if uploaded_file is not None:
         filename_list = np.load(os.path.join("output/", "filenames.npy"))
         feature_list = feature_list.reshape(9997,2048)
 
-        neighbors = NearestNeighbors(
-            n_neighbors=5, algorithm="brute", metric="euclidean"
-        ).fit(feature_list)
+        # neighbors = NearestNeighbors(
+        #     n_neighbors=5, algorithm="brute", metric="euclidean"
+        # ).fit(feature_list)
 
         im = Image.open(uploaded_file)
         im = preprocess(im)
@@ -39,11 +41,37 @@ if uploaded_file is not None:
             input_features = model(im).numpy()
             input_features = [input_features.reshape(2048,1).flatten()]
 
-        tic = time.perf_counter()    
-        distances, indices = neighbors.kneighbors([input_features[0]], 5)
+        # tic = time.perf_counter()    
+        # distances, indices = neighbors.kneighbors([input_features[0]], 5)
+        # toc = time.perf_counter()
+        # st.write(f"Search finished in {toc - tic:0.4f} seconds")
+        # similar_image_paths = filename_list[indices[0]]
+
+        n_components = 128
+        pca = PCA(n_components=n_components)
+        components = pca.fit_transform(feature_list)
+        joblib.dump(pca, os.path.join("output/", "pca.joblib"))
+
+        feature_length = n_components
+        index = AnnoyIndex(feature_length, 'angular')
+        for i, j in enumerate(components):
+            index.add_item(i, j)
+
+        index.build(15)
+        index.save(os.path.join("output/", "index.annoy"))
+
+        pca = joblib.load(os.path.join("output/", "pca.joblib"))
+        components = pca.transform(input_features)[0]
+
+        ann_index = AnnoyIndex(components.shape[0], 'angular')
+        ann_index.load(os.path.join("output/", "index.annoy"))
+
+        tic = time.perf_counter()
+        indices = ann_index.get_nns_by_vector(components, 5, search_k=-1, include_distances=False)
+        indices = np.array(indices)
         toc = time.perf_counter()
         st.write(f"Search finished in {toc - tic:0.4f} seconds")
-        similar_image_paths = filename_list[indices[0]]
+        similar_image_paths = filename_list[indices]
 
         fig, ax = plt.subplots(nrows=1, ncols=5, figsize=(10, 2))
         for idx, path in enumerate(similar_image_paths):
