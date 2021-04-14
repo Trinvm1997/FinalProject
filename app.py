@@ -19,11 +19,7 @@ uploaded_file = st.file_uploader("Choose a cat image ...", type="jpg")
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
     st.image(image, caption='Uploaded cat', use_column_width=True)
-    st.write("")
-    st.write("Classifying...")
-    st.write("Done.")
     if st.button('Find'):
-        st.write("Result...")
         model = features.get_model()
 
         preprocess = features.get_preprocess_pipeline()
@@ -53,10 +49,9 @@ if uploaded_file is not None:
         fig, ax = plt.subplots(nrows=1, ncols=5, figsize=(10, 2))
         for idx, path in enumerate(similar_image_paths):
             print(path)
-            im = Image.open(".\data\cat\cat\\00000001_000.jpg")
+            im = Image.open("data/cat/cat/00001099_016.jpg")
             ax.ravel()[idx].imshow(np.asarray(im))
             ax.ravel()[idx].set_axis_off()
         plt.tight_layout()
         fig.savefig("output/result.png")
-        st.write("Done.")
         st.image(Image.open("output/result.png"),caption='Similar cats', use_column_width=True)
