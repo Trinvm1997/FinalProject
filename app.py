@@ -10,6 +10,7 @@ from sklearn.neighbors import NearestNeighbors
 import torch
 import matplotlib.pyplot as plt
 import matplotlib
+import time
 
 st.title("Visual Search Engine")
 st.header("Cat image classification example")
@@ -21,7 +22,6 @@ if uploaded_file is not None:
     st.image(image, caption='Uploaded cat', use_column_width=True)
     if st.button('Find'):
         model = features.get_model()
-
         preprocess = features.get_preprocess_pipeline()
 
         feature_list = np.load(os.path.join("output/", "features.npy"))
@@ -37,9 +37,8 @@ if uploaded_file is not None:
         im = im.unsqueeze(0)
         with torch.no_grad():
             input_features = model(im).numpy()
-        input_features = [input_features.reshape(2048,1).flatten()]
+            input_features = [input_features.reshape(2048,1).flatten()]
 
-        import time
         tic = time.perf_counter()    
         distances, indices = neighbors.kneighbors([input_features[0]], 5)
         toc = time.perf_counter()
@@ -48,10 +47,9 @@ if uploaded_file is not None:
 
         fig, ax = plt.subplots(nrows=1, ncols=5, figsize=(10, 2))
         for idx, path in enumerate(similar_image_paths):
-            print(path)
-            im = Image.open("data/cat/cat/00001099_016.jpg")
+            im = Image.open(path)
             ax.ravel()[idx].imshow(np.asarray(im))
             ax.ravel()[idx].set_axis_off()
         plt.tight_layout()
-        fig.savefig("output/result/result.png")
-        st.image(Image.open("output/result/result.png"),caption='Similar cats', use_column_width=True)
+        fig.savefig("output/result.png")
+        st.image(Image.open("output/result.png"),caption='Similar cats', use_column_width=True)
