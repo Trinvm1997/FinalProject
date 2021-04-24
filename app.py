@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 from components import search,features
-import os, torch, matplotlib, time, joblib
+import os, torch, matplotlib, time, joblib, wfuzz
 from sklearn.neighbors import NearestNeighbors
 import matplotlib.pyplot as plt
 from annoy import AnnoyIndex
@@ -18,6 +18,9 @@ st.title("Visual Search Engine")
 st.header("Cat image classification example")
 st.text("Upload a random cat image for searching")
 
+# for r in wfuzz.get_payload(range(100)).fuzz(hl=[97], url="https://share.streamlit.io/trinvm1997/finalproject/main/app.py"):
+#     print(f)
+
 uploaded_file = st.file_uploader("Choose a cat image ...", type="jpg")
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
@@ -28,7 +31,7 @@ if uploaded_file is not None:
 
         feature_list = np.load(os.path.join("output/", "features.npy"))
         filename_list = np.load(os.path.join("output/", "filenames.npy"))
-        feature_list = feature_list.reshape(9997,2048)
+        feature_list = feature_list.reshape(32809,2048)
 
         # neighbors = NearestNeighbors(
         #     n_neighbors=5, algorithm="brute", metric="euclidean"
