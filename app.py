@@ -28,7 +28,7 @@ if uploaded_file is not None:
 
         feature_list = np.load(os.path.join("output/", "features.npy"))
         filename_list = np.load(os.path.join("output/", "filenames.npy"))
-        feature_list = feature_list.reshape(9997,2048)
+        feature_list = feature_list.reshape(32809,2048)
 
         # neighbors = NearestNeighbors(
         #     n_neighbors=5, algorithm="brute", metric="euclidean"

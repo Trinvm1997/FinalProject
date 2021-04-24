@@ -6,7 +6,6 @@ import torch.nn as nn
 import os
 import numpy as np
 
-
 def get_model():
     model = models.resnext101_32x8d(pretrained=True)
     newmodel = torch.nn.Sequential(*(list(model.children())[:-1]))
@@ -27,7 +26,10 @@ def get_preprocess_pipeline():
 
 def extract_features(image_path, output_path):
     print("[INFO] Instantiating Model")
+    use_cuda = torch.cuda.is_available()
+    device = torch.device("cuda" if use_cuda else "cpu")
     model = get_model()
+    model.cuda()
 
     print("[INFO] Instantiating Preprocessing Pipeline")
     preprocess = get_preprocess_pipeline()
@@ -44,8 +46,8 @@ def extract_features(image_path, output_path):
     with torch.no_grad():
         for idx, data in enumerate(data_loader):
             input_file = data_loader.dataset.samples[idx]
-            features = model(data[0])
-            feature_list.append(features.numpy()[0])
+            features = model(data[0].cuda())
+            feature_list.append(features.cpu().numpy()[0])
             filename_list.append(input_file[0])
 
             if idx % 1000 == 0:
