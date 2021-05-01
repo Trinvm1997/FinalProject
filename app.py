@@ -5,15 +5,15 @@ import numpy as np
 import pandas as pd
 from PIL import Image
 from components import search,features
-import os, torch, matplotlib, time, joblib
+import os, torch, matplotlib, time, joblib, SessionState
 from sklearn.neighbors import NearestNeighbors
-import matplotlib.pyplot as plt
 from annoy import AnnoyIndex
 from sklearn.decomposition import PCA
 import streamlit.components.v1 as components
 
 matplotlib.use('Agg')
 np.random.seed(0)
+session_state = SessionState.get(image='', pca='', list='')
 
 def find(uploaded_file):
     model = features.get_model()
@@ -21,11 +21,7 @@ def find(uploaded_file):
 
     feature_list = np.load(os.path.join("output/", "features.npy"))
     filename_list = np.load(os.path.join("output/", "filenames.npy"))
-    feature_list = feature_list.reshape(32809,2048)
-
-    # neighbors = NearestNeighbors(
-    #     n_neighbors=5, algorithm="brute", metric="euclidean"
-    # ).fit(feature_list)
+    feature_list = feature_list.reshape(9997,2048)
 
     im = Image.open(uploaded_file)
     im = preprocess(im)
@@ -33,12 +29,6 @@ def find(uploaded_file):
     with torch.no_grad():
         input_features = model(im).numpy()
         input_features = [input_features.reshape(2048,1).flatten()]
-
-    # tic = time.perf_counter()    
-    # distances, indices = neighbors.kneighbors([input_features[0]], 5)
-    # toc = time.perf_counter()
-    # st.write(f"Search finished in {toc - tic:0.4f} seconds")
-    # similar_image_paths = filename_list[indices[0]]
 
     n_components = 128
     pca = PCA(n_components=n_components)
@@ -50,7 +40,7 @@ def find(uploaded_file):
     for i, j in enumerate(components):
         index.add_item(i, j)
 
-    index.build(15)
+    index.build(15, n_jobs=-1)
     index.save(os.path.join("output/", "index.annoy"))
 
     pca = joblib.load(os.path.join("output/", "pca.joblib"))
@@ -61,21 +51,35 @@ def find(uploaded_file):
 
     tic = time.perf_counter()
     indices = ann_index.get_nns_by_vector(components, 5, search_k=-1, include_distances=False)
-    indices = np.array(indices)
     toc = time.perf_counter()
     st.write(f"Search finished in {toc - tic:0.4f} seconds")
     similar_image_paths = filename_list[indices]
 
-    fig, ax = plt.subplots(nrows=1, ncols=5, figsize=(10, 2))
-    for idx, path in enumerate(similar_image_paths):
-        im = Image.open(path.replace("\\","/"))
-        ax.ravel()[idx].imshow(np.asarray(im))
-        ax.ravel()[idx].set_axis_off()
-    plt.tight_layout()
-    fig.savefig("result.png")
+    cols = st.beta_columns(5)
+    count = 0
+    for image in similar_image_paths:
+        image = image.replace("\\","/")
+        if count == 0:
+            cols[count].image(image,caption=image[13:-4])
+            count+=1
+        elif count == 1:
+            cols[count].image(image,caption=image[13:-4])
+            count+=1
+        elif count == 2:
+            cols[count].image(image,caption=image[13:-4])
+            count+=1
+        elif count == 3:
+            cols[count].image(image,caption=image[13:-4])
+            count+=1
+        else:
+            cols[count].image(image,caption=image[13:-4])
+            count-=4
+    
+    session_state.image = input_features
+    session_state.pca = components
 
 def main():
-    menu = ["Home","About","Abyssinian","American Bobtail","American Curl"]
+    menu = ["Home","Visualization","Abyssinian","American Bobtail","American Curl"]
     choice = st.sidebar.selectbox("Menu", menu)
 
     if choice == "Home":
@@ -89,75 +93,22 @@ def main():
             image = Image.open(uploaded_file)
             st.image(image, caption='Uploaded cat', use_column_width=True)
             if st.button('Find'):
-<<<<<<< Updated upstream
-                find(uploaded_file)
-=======
-                model = features.get_model()
-                preprocess = features.get_preprocess_pipeline()
-
-                feature_list = np.load(os.path.join("output/", "features.npy"))
-                filename_list = np.load(os.path.join("output/", "filenames.npy"))
-                feature_list = feature_list.reshape(9997,2048)
-
-                # neighbors = NearestNeighbors(
-                #     n_neighbors=5, algorithm="brute", metric="euclidean"
-                # ).fit(feature_list)
-
-                im = Image.open(uploaded_file)
-                im = preprocess(im)
-                im = im.unsqueeze(0)
-                with torch.no_grad():
-                    input_features = model(im).numpy()
-                    input_features = [input_features.reshape(2048,1).flatten()]
-
-                # tic = time.perf_counter()    
-                # distances, indices = neighbors.kneighbors([input_features[0]], 5)
-                # toc = time.perf_counter()
-                # st.write(f"Search finished in {toc - tic:0.4f} seconds")
-                # similar_image_paths = filename_list[indices[0]]
-
-                n_components = 128
-                pca = PCA(n_components=n_components)
-                components = pca.fit_transform(feature_list)
-                joblib.dump(pca, os.path.join("pca.joblib"))
-
-                feature_length = n_components
-                index = AnnoyIndex(feature_length, 'angular')
-                for i, j in enumerate(components):
-                    index.add_item(i, j)
-
-                index.build(15)
-                index.save(os.path.join("output/", "index.annoy"))
-
-                pca = joblib.load(os.path.join("output/", "pca.joblib"))
-                components = pca.transform(input_features)[0]
-
-                ann_index = AnnoyIndex(components.shape[0], 'angular')
-                ann_index.load(os.path.join("output/", "index.annoy"))
-
-                tic = time.perf_counter()
-                indices = ann_index.get_nns_by_vector(components, 5, search_k=-1, include_distances=False)
-                indices = np.array(indices)
-                toc = time.perf_counter()
-                st.write(f"Search finished in {toc - tic:0.4f} seconds")
-                similar_image_paths = filename_list[indices]
-                st.text(similar_image_paths)
-
-                fig, ax = plt.subplots(nrows=1, ncols=5, figsize=(10, 2))
-                for idx, path in enumerate(similar_image_paths):
-                    im = Image.open(path.replace("\\","/"))
-                    ax.ravel()[idx].imshow(np.asarray(im))
-                    ax.ravel()[idx].set_axis_off()
-                plt.tight_layout()
-                fig.savefig("result.png")
->>>>>>> Stashed changes
-                st.image(Image.open("result.png"),caption='Similar cats', use_column_width=True)
+                find(uploaded_file)                
     
-    elif choice == "About":
-        st.subheader("About App")
-        st.text("This App is designed to stimulate")
-        st.text("how a visual search engine is implemented into an E-Commerce website")
-        st.text("the souce code and document can be found at")
+    elif choice == "Visualization":
+        image = session_state.image
+        pca = session_state.pca
+        cols = st.beta_columns(3)
+        cols[0].dataframe(image[0])
+        cols[1].text("")
+        cols[1].text("")
+        cols[1].text("")
+        cols[1].text("")
+        cols[1].text("")
+        cols[1].text("")
+        cols[1].text("")
+        cols[1].markdown("<h1 style='display: flex; justify-content: center; align-items: center; color: red;'> ===> </h1>", unsafe_allow_html=True)
+        cols[2].dataframe(pca)
 
     elif choice == "Abyssinian":
         st.subheader("List of Abyssinian cats")
@@ -185,16 +136,16 @@ def main():
         count=0
         for idx,file in enumerate(filenames):
             if count == 0:
-                cols[count].image("data/images/American Bobtail/" + file, width=150, caption="Abyssian "+file[0:-4])
+                cols[count].image("data/images/American Bobtail/" + file, caption="Abyssian "+file[0:-4])
                 count+=1
             elif count == 1:
-                cols[count].image("data/images/American Bobtail/" + file, width=150, caption="Abyssian "+file[0:-4])
+                cols[count].image("data/images/American Bobtail/" + file, caption="Abyssian "+file[0:-4])
                 count+=1
             elif count == 2:
-                cols[count].image("data/images/American Bobtail/" + file, width=150, caption="Abyssian "+file[0:-4])
+                cols[count].image("data/images/American Bobtail/" + file, caption="Abyssian "+file[0:-4])
                 count+=1
             else:
-                cols[count].image("data/images/American Bobtail/" + file, width=150, caption="Abyssian "+file[0:-4])
+                cols[count].image("data/images/American Bobtail/" + file, caption="Abyssian "+file[0:-4])
                 count-=3
 
     else:
@@ -204,16 +155,16 @@ def main():
         count=0
         for idx,file in enumerate(filenames):
             if count == 0:
-                cols[count].image("data/images/American Curl/" + file, width=150, caption="Abyssian "+file[0:-4])
+                cols[count].image("data/images/American Curl/" + file, caption="Abyssian "+file[0:-4])
                 count+=1
             elif count == 1:
-                cols[count].image("data/images/American Curl/" + file, width=150, caption="Abyssian "+file[0:-4])
+                cols[count].image("data/images/American Curl/" + file, caption="Abyssian "+file[0:-4])
                 count+=1
             elif count == 2:
-                cols[count].image("data/images/American Curl/" + file, width=150, caption="Abyssian "+file[0:-4])
+                cols[count].image("data/images/American Curl/" + file, caption="Abyssian "+file[0:-4])
                 count+=1
             else:
-                cols[count].image("data/images/American Curl/" + file, width=150, caption="Abyssian "+file[0:-4])
+                cols[count].image("data/images/American Curl/" + file, caption="Abyssian "+file[0:-4])
                 count-=3
 
 if __name__ == '__main__':
