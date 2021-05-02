@@ -112,7 +112,7 @@ def main():
 
     elif choice == "Abyssinian":
         st.subheader("List of Abyssinian cats")
-        filenames = os.listdir("data\images\Abyssinian")
+        filenames = os.listdir("data/images/Abyssinian")
         cols = st.beta_columns(4)
         count=0
         for idx,file in enumerate(filenames):
@@ -131,7 +131,7 @@ def main():
 
     elif choice == "American Bobtail":
         st.subheader("List of American Bobtail cats")
-        filenames = os.listdir("data\images\American Bobtail")
+        filenames = os.listdir("data/images/American Bobtail")
         cols = st.beta_columns(4)
         count=0
         for idx,file in enumerate(filenames):
@@ -150,7 +150,7 @@ def main():
 
     else:
         st.subheader("List of American Curl cats")
-        filenames = os.listdir("data\images\American Curl")
+        filenames = os.listdir("data/images/American Curl")
         cols = st.beta_columns(4)
         count=0
         for idx,file in enumerate(filenames):
