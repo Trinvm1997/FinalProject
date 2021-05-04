@@ -77,6 +77,7 @@ def find(uploaded_file):
     
     session_state.image = input_features
     session_state.pca = components
+    session_state.list = feature_list
 
 def main():
     menu = ["Home","Visualization","Abyssinian","American Bobtail","American Curl"]
@@ -93,11 +94,12 @@ def main():
             image = Image.open(uploaded_file)
             st.image(image, caption='Uploaded cat', use_column_width=True)
             if st.button('Find'):
-                find(uploaded_file)                
+                find(uploaded_file)
     
     elif choice == "Visualization":
         image = session_state.image
         pca = session_state.pca
+        features_list = session_state.list
         cols = st.beta_columns(3)
         cols[0].dataframe(image[0])
         cols[1].text("")
@@ -109,6 +111,7 @@ def main():
         cols[1].text("")
         cols[1].markdown("<h1 style='display: flex; justify-content: center; align-items: center; color: red;'> ===> </h1>", unsafe_allow_html=True)
         cols[2].dataframe(pca)
+        st.dataframe(features_list[0:100])
 
     elif choice == "Abyssinian":
         st.subheader("List of Abyssinian cats")
